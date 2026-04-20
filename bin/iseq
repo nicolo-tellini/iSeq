@@ -462,8 +462,9 @@ function getSRAMetadata() {
 
 function downloadSRA() {
     local SRR=$1 # only SRR_ID
-    local SRALink=$(grep "$SRR" $accession.metadata.tsv | tr "\t" "\n" | grep -e "ftp.sra.ebi.ac.uk/vol[0-9]/[sde]rr" | grep -v "lite" | uniq)
-    local FASTQLink=$(grep "$SRR" $accession.metadata.tsv | tr "\t" "\n" | grep -e "ftp.sra.ebi.ac.uk/vol[0-9]/fastq" | uniq)
+	local SRALink FASTQLink
+	SRALink=$(awk -F '\t' -v srr="$SRR" 'NR>1 && $6==srr {print $39}' "$accession.metadata.tsv" | tr ';' '\n' | grep -v 'lite' | head -n 1)
+	FASTQLink=$(awk -F '\t' -v srr="$SRR" 'NR>1 && $6==srr {print $30}' "$accession.metadata.tsv" | head -n 1)
 
     if [[ $gzip -eq 1 && ! -z $FASTQLink && ! $database =~ ^[sS][rR][aA]$ && $fastq -eq 0 ]]; then 
         echo -e "\033[32mNote\033[0m: -g used, download FASTQ files in gzip format directly"
